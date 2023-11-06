@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg"
+    tools:context=".TownFragment">
+
+    <LinearLayout
+        android:layout_marginTop="150dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:gravity="center"
+        android:padding="15dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/current_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12°"
+            android:textSize="70sp" />
+
+        <TextView
+            android:id="@+id/feels_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ощущается 9°"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <GridLayout
+        android:id="@+id/tablelayout"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:columnCount="2"
+        android:layout_gravity="end">
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:layout_gravity="center"
+                android:src="@drawable/_0d" />
+            <TextView
+                android:id="@+id/weather_description"
+                android:text="Sunny"
+                android:maxWidth="95dp"
+                android:minLines = "1"
+                android:maxLines = "4"
+                android:singleLine = "false"
+                android:layout_gravity="fill"
+                android:gravity="start|center"
+                android:padding="3dip" />
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/pressure" />
+            <TextView
+                android:id="@+id/pressure"
+                android:text="765 мм.рт.ст."
+                android:layout_gravity="fill"
+                android:gravity="start|center"
+                android:padding="3dip" />
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/humidity" />
+            <TextView
+                android:id="@+id/humidity"
+                android:text="45%"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/pop" />
+            <TextView
+                android:id="@+id/pop"
+                android:text="23%"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/wind" />
+            <TextView
+                android:id="@+id/wind"
+                android:text="5 м/с Ю-З"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/visibility" />
+            <TextView
+                android:id="@+id/visibility"
+                android:text="5 км"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/clouds" />
+            <TextView
+                android:id="@+id/clouds"
+                android:text="33%"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/sunrise" />
+            <TextView
+                android:id="@+id/sunrise"
+                android:text="4:43:32"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="3dip"
+                android:src="@drawable/sunset" />
+            <TextView
+                android:id="@+id/sunset"
+                android:text="18:43:32"
+                android:padding="3dip"
+                android:layout_gravity="fill"
+                android:gravity="start|center"/>
+
+    </GridLayout>
+    <LinearLayout
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include
+            layout="@layout/days_weather"/>
+        <include layout="@layout/days_weather"/>
+        <include layout="@layout/days_weather"/>
+        <include layout="@layout/days_weather"/>
+        <include layout="@layout/days_weather"/>
+    </LinearLayout>
+</FrameLayout>

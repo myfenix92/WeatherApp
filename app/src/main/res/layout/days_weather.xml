@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_weight="1"
+    android:background="#ffffff"
+    android:gravity="center"
+    android:paddingTop="20dp"
+    android:id="@+id/card_view_days_weather">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/date_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:text="23/12/2023"
+                android:textSize="13sp" />
+            <ImageView
+                android:id="@+id/icon_weather"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/_0d"/>
+            <TextView
+                android:id="@+id/day_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="14°/5°"
+                android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>
