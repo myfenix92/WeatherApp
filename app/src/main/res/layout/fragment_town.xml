@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
     tools:context=".TownFragment">
 
     <LinearLayout
@@ -58,7 +57,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/pressure" />
+                android:src="@drawable/param_pressure" />
             <TextView
                 android:id="@+id/pressure"
                 android:text="765 мм.рт.ст."
@@ -69,7 +68,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/humidity" />
+                android:src="@drawable/param_humidity" />
             <TextView
                 android:id="@+id/humidity"
                 android:text="45%"
@@ -81,7 +80,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/pop" />
+                android:src="@drawable/param_pop" />
             <TextView
                 android:id="@+id/pop"
                 android:text="23%"
@@ -93,7 +92,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/wind" />
+                android:src="@drawable/param_wind" />
             <TextView
                 android:id="@+id/wind"
                 android:text="5 м/с Ю-З"
@@ -105,7 +104,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/visibility" />
+                android:src="@drawable/param_visibility" />
             <TextView
                 android:id="@+id/visibility"
                 android:text="5 км"
@@ -117,7 +116,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/clouds" />
+                android:src="@drawable/param_clouds" />
             <TextView
                 android:id="@+id/clouds"
                 android:text="33%"
@@ -129,7 +128,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/sunrise" />
+                android:src="@drawable/param_sunrise" />
             <TextView
                 android:id="@+id/sunrise"
                 android:text="4:43:32"
@@ -141,7 +140,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
-                android:src="@drawable/sunset" />
+                android:src="@drawable/param_sunset" />
             <TextView
                 android:id="@+id/sunset"
                 android:text="18:43:32"

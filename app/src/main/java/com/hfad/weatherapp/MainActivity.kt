@@ -1,6 +1,14 @@
 package com.hfad.weatherapp
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -29,6 +37,57 @@ class MainActivity : AppCompatActivity() {
         }.attach()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.refresh_weather -> Toast.makeText(this, "refresh", Toast.LENGTH_SHORT).show()
+            R.id.add_town -> addNewTown()
+            R.id.list_towns -> viewListTown()
+            R.id.units -> Toast.makeText(this, "units", Toast.LENGTH_SHORT).show()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun addNewTown() {
+        val layoutInflater: LayoutInflater = LayoutInflater.from(applicationContext)
+        val promtView: View = layoutInflater.inflate(R.layout.add_new_town_alert, null)
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setIcon(R.drawable.town)
+        builder.setTitle(R.string.add_new_town)
+        builder.setView(promtView)
+        builder.setPositiveButton(R.string.ok_btn) { dialog, which ->
+            dialog.dismiss()
+        }
+        builder.setNegativeButton(R.string.cancel_btn) { dialog, which ->
+            dialog.dismiss()
+        }
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun viewListTown() {
+        val catNames = arrayOf("Васька", "Рыжик", "Мурзик")
+        var name: String = ""
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setIcon(R.drawable.town)
+        builder.setTitle(R.string.list_towns)
+        builder.setMultiChoiceItems(catNames, null) { _, which, _ ->
+       //     checkedItems[which] = isChecked
+            name = catNames[which] // Get the clicked item
+        }
+        builder.setPositiveButton(R.string.ok_btn) { dialog, which ->
+            Toast.makeText(this, name, Toast.LENGTH_SHORT).show()
+        }
+        builder.setNegativeButton(R.string.delete_btn) { dialog, which ->
+            dialog.dismiss()
+        }
+        builder.create()
+        builder.show()
+    }
 
 }
 

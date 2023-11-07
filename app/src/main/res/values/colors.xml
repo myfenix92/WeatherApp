@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="test">#2CE353</color>
+    <color name="bg_fragment">#B8B8B8</color>
 </resources>

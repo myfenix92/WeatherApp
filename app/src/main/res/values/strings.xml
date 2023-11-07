@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">WeatherApp</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="days_weather_temp_delimiter">%1$d / %2$d</string>
+    <string name="refresh">Обновить погоду</string>
+    <string name="add_new_town">Добавить город</string>
+    <string name="list_towns">Список городов</string>
+    <string name="units">Единицы измерения</string>
+    <string name="ok_btn">OK</string>
+    <string name="cancel_btn">Отмена</string>
+    <string name="delete_btn">Удалить отмеченные?</string>
 </resources>
