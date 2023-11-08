@@ -147,6 +147,17 @@
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="3dip"
+            android:src="@drawable/param_clock" />
+        <TextView
+            android:id="@+id/timeTown"
+            android:text="03:43:32"
+            android:padding="3dip"
+            android:layout_gravity="fill"
+            android:gravity="start|center"/>
 
     </GridLayout>
     <LinearLayout

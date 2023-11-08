@@ -8,7 +8,8 @@ data class WeatherData(
     val visibility: Int,
     var pop: Double?,
     val weather: List<Weather>,
-    val wind: Wind
+    val wind: Wind,
+    val timezone: Int
 ) {
     data class Clouds(
         val all: Int
