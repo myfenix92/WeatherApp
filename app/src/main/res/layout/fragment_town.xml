@@ -18,14 +18,12 @@
             android:id="@+id/current_temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="12°"
             android:textSize="70sp" />
 
         <TextView
             android:id="@+id/feels_temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ощущается 9°"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -45,7 +43,6 @@
                 android:src="@drawable/_0d" />
             <TextView
                 android:id="@+id/weather_description"
-                android:text="Sunny"
                 android:maxWidth="95dp"
                 android:minLines = "1"
                 android:maxLines = "4"
@@ -60,7 +57,6 @@
                 android:src="@drawable/param_pressure" />
             <TextView
                 android:id="@+id/pressure"
-                android:text="765 мм.рт.ст."
                 android:layout_gravity="fill"
                 android:gravity="start|center"
                 android:padding="3dip" />
@@ -71,7 +67,6 @@
                 android:src="@drawable/param_humidity" />
             <TextView
                 android:id="@+id/humidity"
-                android:text="45%"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -83,7 +78,6 @@
                 android:src="@drawable/param_pop" />
             <TextView
                 android:id="@+id/pop"
-                android:text="23%"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -95,7 +89,6 @@
                 android:src="@drawable/param_wind" />
             <TextView
                 android:id="@+id/wind"
-                android:text="5 м/с Ю-З"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -107,7 +100,6 @@
                 android:src="@drawable/param_visibility" />
             <TextView
                 android:id="@+id/visibility"
-                android:text="5 км"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -119,7 +111,6 @@
                 android:src="@drawable/param_clouds" />
             <TextView
                 android:id="@+id/clouds"
-                android:text="33%"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -131,7 +122,6 @@
                 android:src="@drawable/param_sunrise" />
             <TextView
                 android:id="@+id/sunrise"
-                android:text="4:43:32"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -143,7 +133,6 @@
                 android:src="@drawable/param_sunset" />
             <TextView
                 android:id="@+id/sunset"
-                android:text="18:43:32"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
@@ -154,7 +143,6 @@
             android:src="@drawable/param_clock" />
         <TextView
             android:id="@+id/timeTown"
-            android:text="03:43:32"
             android:padding="3dip"
             android:layout_gravity="fill"
             android:gravity="start|center"/>

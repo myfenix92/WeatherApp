@@ -1,8 +1,9 @@
 package com.hfad.weatherapp
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -12,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -27,34 +29,144 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.text.SimpleDateFormat
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 import java.util.TimeZone
 
 
-const val countTabs: Int = 5
-
+//var savedTown: MutableList<String> = mutableListOf()
+var countTabs: Int = 0
 class MainActivity : AppCompatActivity() {
     private val dataList: MutableList<WeatherData> = mutableListOf()
+    private var savedTown: MutableList<String> = mutableListOf()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("onCreate", "create")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(findViewById(R.id.toolbar))
         val viewPager: ViewPager2 = findViewById(R.id.pager)
         viewPager.adapter = SectionPagerAdapter(this)
+        savedTown = loadTown()?.toMutableList() ?: mutableListOf()
+        countTabs = savedTown.size
 
         val tabLayout: TabLayout = findViewById(R.id.tabs)
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = "Town ${(position + 1)}"
-        }.attach()
+        if (countTabs == 0) {
+            addNewTown()
+        } else {
+            //viewPager.currentItem = 0
+            TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+                tab.text = savedTown[position]
+            }.attach()
+        }
+
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val tabTown: String = tab?.text.toString()
+                val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    val response = weatherApi.getWeather(tabTown, Locale.getDefault().country)
+                    withContext(Dispatchers.Main) {
+                        try {
+                            if (response.isSuccessful) {
+                                runOnUiThread {
+                                    val tempText: TextView = findViewById(R.id.current_temp)
+                                    val tempFeelsText: TextView = findViewById(R.id.feels_temp)
+                                    val weatherDescriptionText: TextView =
+                                        findViewById(R.id.weather_description)
+                                    val pressureText: TextView = findViewById(R.id.pressure)
+                                    val humidityText: TextView = findViewById(R.id.humidity)
+                                    val popText: TextView = findViewById(R.id.pop)
+                                    val windText: TextView = findViewById(R.id.wind)
+                                    val visibilityText: TextView = findViewById(R.id.visibility)
+                                    val cloudsText: TextView = findViewById(R.id.clouds)
+                                    val sunriseText: TextView = findViewById(R.id.sunrise)
+                                    val sunsetText: TextView = findViewById(R.id.sunset)
+                                    val timeTownText: TextView = findViewById(R.id.timeTown)
+                                    Log.d("textV", tempText.text.toString())
+                                    tempText.text =
+                                        getString(R.string.temp_value, response.body()?.main?.temp)
+                                    tempFeelsText.text = getString(
+                                        R.string.temp_feels_value,
+                                        response.body()?.main?.feels_like
+                                    )
+                                    weatherDescriptionText.text =
+                                        response.body()?.weather?.get(0)?.description
+                                    pressureText.text = getString(
+                                        R.string.pressure_value,
+                                        response.body()?.main?.pressure
+                                    )
+                                    humidityText.text = getString(
+                                        R.string.percent_value,
+                                        response.body()?.main?.humidity.toString()
+                                    )
+                                    popText.text = getString(
+                                        R.string.percent_value,
+                                        response.body()?.pop ?: "0"
+                                    )
+                                    windText.text = getString(
+                                        R.string.wind_value,
+                                        response.body()?.wind?.speed, response.body()?.wind?.deg
+                                    )
+                                    visibilityText.text = getString(
+                                        R.string.visibility_value,
+                                        response.body()?.visibility
+                                    )
+                                    cloudsText.text = getString(
+                                        R.string.percent_value,
+                                        response.body()?.clouds?.all.toString()
+                                    )
+                                    val tz = TimeZone.getDefault()
+                                    sunriseText.text = getDateString(
+                                        response.body()!!.sys.sunrise +
+                                                response.body()!!.timezone - tz.rawOffset / 1000
+                                    )
+                                    sunsetText.text = getDateString(
+                                        response.body()!!.sys.sunset +
+                                                response.body()!!.timezone - tz.rawOffset / 1000
+                                    )
+                                    timeTownText.text = getDateString(
+                                        response.body()!!.dt +
+                                                response.body()!!.timezone - tz.rawOffset / 1000
+                                    )
+                                }
+
+                            }
+                        } catch (e: Throwable) {
+                            Toast.makeText(applicationContext, "Oops", Toast.LENGTH_SHORT).show()
+
+                        }
+                    }
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+
+    fun saveTown(nameTown: MutableList<String>) {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("WeatherTown", MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        editor.putStringSet("save_town", nameTown.toSet())
+        editor.apply()
+    }
+
+    fun loadTown(): MutableSet<String>? {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("WeatherTown", MODE_PRIVATE)
+        //    Toast.makeText(this, shKey.toString(), Toast.LENGTH_SHORT).show()
+        return sharedPreferences.getStringSet("save_town", null)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -91,6 +203,7 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle(R.string.add_new_town)
         builder.setView(promtView)
         var townName: String
+
         val inputTown: EditText = promtView.findViewById(R.id.input_new_town)
         builder.setPositiveButton(R.string.ok_btn) { _, _ ->
 
@@ -105,13 +218,23 @@ class MainActivity : AppCompatActivity() {
                 townName = inputTown.text.toString()
 
                 val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
+
                 CoroutineScope(Dispatchers.IO).launch {
                     val response = weatherApi.getWeather(townName, Locale.getDefault().country)
                     withContext(Dispatchers.Main) {
                         if (!checkTownName(inputTown, applicationContext, response.code())) {
                             try {
                                 if (response.isSuccessful) {
+                                    val tabLayout: TabLayout = findViewById(R.id.tabs)
+                                    tabLayout.addTab(tabLayout.newTab().setText(townName), true)
+
+
+
                                     runOnUiThread {
+                                        savedTown.add(townName)
+                                        saveTown(savedTown)
+                                        countTabs++
+
                                         val tempText: TextView = findViewById(R.id.current_temp)
                                         val tempFeelsText: TextView = findViewById(R.id.feels_temp)
                                         val weatherDescriptionText: TextView = findViewById(R.id.weather_description)
@@ -124,47 +247,59 @@ class MainActivity : AppCompatActivity() {
                                         val sunriseText: TextView = findViewById(R.id.sunrise)
                                         val sunsetText: TextView = findViewById(R.id.sunset)
                                         val timeTownText: TextView = findViewById(R.id.timeTown)
+                                        Log.d("textV", tempText.text.toString())
+                                            tempText.text = getString(R.string.temp_value, response.body()?.main?.temp)
+                                            tempFeelsText.text = getString(R.string.temp_feels_value, response.body()?.main?.feels_like)
+                                            weatherDescriptionText.text = response.body()?.weather?.get(0)?.description
+                                            pressureText.text = getString(R.string.pressure_value,
+                                                response.body()?.main?.pressure)
+                                            humidityText.text = getString(R.string.percent_value,
+                                                response.body()?.main?.humidity.toString())
+                                            popText.text = getString(R.string.percent_value,
+                                                response.body()?.pop ?: "0")
+                                            windText.text = getString(R.string.wind_value,
+                                                response.body()?.wind?.speed, response.body()?.wind?.deg)
+                                            visibilityText.text = getString(R.string.visibility_value,
+                                                response.body()?.visibility)
+                                            cloudsText.text = getString(R.string.percent_value,
+                                                response.body()?.clouds?.all.toString())
+                                            val tz = TimeZone.getDefault()
+                                            sunriseText.text = getDateString(response.body()!!.sys.sunrise +
+                                                response.body()!!.timezone - tz.rawOffset / 1000)
+                                            sunsetText.text = getDateString(response.body()!!.sys.sunset+
+                                                    response.body()!!.timezone - tz.rawOffset / 1000)
+                                            timeTownText.text = getDateString(response.body()!!.dt +
+                                                    response.body()!!.timezone - tz.rawOffset / 1000)
 
-                                        tempText.text = getString(R.string.temp_value, response.body()?.main?.temp)
-                                        tempFeelsText.text = getString(R.string.temp_feels_value, response.body()?.main?.feels_like)
-                                        weatherDescriptionText.text = response.body()?.weather?.get(0)?.description
-                                        pressureText.text = getString(R.string.pressure_value,
-                                            response.body()?.main?.pressure)
-                                        humidityText.text = getString(R.string.percent_value,
-                                            response.body()?.main?.humidity.toString())
-                                        popText.text = getString(R.string.percent_value,
-                                            response.body()?.pop ?: "0")
-                                        windText.text = getString(R.string.wind_value,
-                                            response.body()?.wind?.speed, response.body()?.wind?.deg)
-                                        visibilityText.text = getString(R.string.visibility_value,
-                                            response.body()?.visibility)
-                                        cloudsText.text = getString(R.string.percent_value,
-                                            response.body()?.clouds?.all.toString())
-                                        val tz = TimeZone.getDefault()
-                                    //    Toast.makeText(applicationContext, tz.rawOffset.toString(), Toast.LENGTH_SHORT).show()
-                                        sunriseText.text = getDateString(response.body()!!.sys.sunrise.toLong() +
-                                            response.body()!!.timezone - tz.rawOffset / 1000)
-                                        sunsetText.text = getDateString(response.body()!!.sys.sunset.toLong() +
-                                                response.body()!!.timezone - tz.rawOffset / 1000)
-                                        timeTownText.text = getDateString(response.body()!!.dt.toLong() +
-                                                response.body()!!.timezone - tz.rawOffset / 1000)
-//                                        sunriseText.text = getDateString((response.body()!!.sys.sunrise
-//                                                - tz.rawOffset + response.body()!!.timezone * 1000).toLong())
-//                                        sunsetText.text = getDateString((response.body()!!.sys.sunset
-//                                                - tz.rawOffset + response.body()!!.timezone * 1000).toLong())
-//                                        timeTownText.text = getDateString((response.body()!!.dt
-//                                                - tz.rawOffset + response.body()!!.timezone * 1000).toLong())
                                     }
+
                                 }
                             } catch (e: HttpException) {
                                 Toast.makeText(applicationContext, "Exception ${e.message}", Toast.LENGTH_SHORT).show()
                             } catch (e: Throwable) {
                                 Toast.makeText(applicationContext, "Ooops: Something else went wrong", Toast.LENGTH_SHORT).show()
                             }
-                            alertDialog.dismiss();
+
+//                            Log.d("temper", tempText.text.toString())
+                            alertDialog.dismiss()
+
+
                         }
+
                     }
+
                 }
+                val tabLayout: TabLayout = findViewById(R.id.tabs)
+                val viewPager: ViewPager2 = findViewById(R.id.pager)
+                Log.d("current", viewPager.currentItem.toString())
+                viewPager.currentItem = countTabs - 1
+                tabLayout.selectTab(tabLayout.getTabAt(viewPager.currentItem))
+                Log.d("current", viewPager.currentItem.toString())
+                viewPager.setOnDragListener { v, event ->
+                    Log.d("event", event.toString())
+                    return@setOnDragListener true
+                }
+                viewPager.adapter = SectionPagerAdapter(this@MainActivity)
             }
         })
     }
@@ -176,19 +311,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun viewListTown() {
-        val catNames = arrayOf("Васька", "Рыжик", "Мурзик")
         var name = ""
+    //    Toast.makeText(this, loadTown().size.toString(), Toast.LENGTH_SHORT).show()
+        val checkedItems: MutableList<Boolean> = BooleanArray(savedTown.size).toMutableList()
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setIcon(R.drawable.town)
         builder.setTitle(R.string.list_towns)
-        builder.setMultiChoiceItems(catNames, null) { _, which, _ ->
-       //     checkedItems[which] = isChecked
-            name = catNames[which] // Get the clicked item
+        builder.setMultiChoiceItems(savedTown.toTypedArray(), checkedItems.toBooleanArray()) { _, which, isChecked ->
+            checkedItems[which] = isChecked
+            name = savedTown[which]
         }
-        builder.setPositiveButton(R.string.ok_btn) { _, _ ->
-            Toast.makeText(this, name, Toast.LENGTH_SHORT).show()
+        builder.setPositiveButton(R.string.ok_btn) { dialog, _ ->
+            dialog.dismiss()
         }
-        builder.setNegativeButton(R.string.delete_btn) { dialog, _ ->
+        builder.setNegativeButton(R.string.delete_btn) { dialog, which ->
+            val tabLayout: TabLayout = findViewById(R.id.tabs)
+            val viewPager: ViewPager2 = findViewById(R.id.pager)
+            for(i in savedTown.size - 1 downTo 0) {
+                if (checkedItems[i]) {
+                    savedTown.removeAt(i)
+                    tabLayout.removeTab(tabLayout.getTabAt(i)!!)
+                }
+            }
+
+            saveTown(savedTown)
+            countTabs = savedTown.size
+            viewPager.currentItem = 0
+            viewPager.adapter = SectionPagerAdapter(this)
             dialog.dismiss()
         }
         builder.create()
@@ -206,6 +355,4 @@ private class SectionPagerAdapter(fragment: FragmentActivity?) :
     override fun createFragment(position: Int): Fragment {
         return TownFragment()
     }
-
-
 }

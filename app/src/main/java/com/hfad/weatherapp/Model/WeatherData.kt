@@ -1,7 +1,7 @@
 package com.hfad.weatherapp.Model
 data class WeatherData(
     val clouds: Clouds,
-    val dt: Int,
+    val dt: Long,
     val cod: Int,
     val main: Main,
     val sys: Sys,
@@ -25,8 +25,8 @@ data class WeatherData(
     )
 
     data class Sys(
-        val sunrise: Int,
-        val sunset: Int
+        val sunrise: Long,
+        val sunset: Long
     )
 
     data class Weather(
