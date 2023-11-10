@@ -28,20 +28,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
 
-//var savedTown: MutableList<String> = mutableListOf()
 var countTabs: Int = 0
+
 class MainActivity : AppCompatActivity() {
     private val dataList: MutableList<WeatherData> = mutableListOf()
     private var savedTown: MutableList<String> = mutableListOf()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("onCreate", "create")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -64,82 +64,7 @@ class MainActivity : AppCompatActivity() {
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val tabTown: String = tab?.text.toString()
-                val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    val response = weatherApi.getWeather(tabTown, Locale.getDefault().country)
-                    withContext(Dispatchers.Main) {
-                        try {
-                            if (response.isSuccessful) {
-                                runOnUiThread {
-                                    val tempText: TextView = findViewById(R.id.current_temp)
-                                    val tempFeelsText: TextView = findViewById(R.id.feels_temp)
-                                    val weatherDescriptionText: TextView =
-                                        findViewById(R.id.weather_description)
-                                    val pressureText: TextView = findViewById(R.id.pressure)
-                                    val humidityText: TextView = findViewById(R.id.humidity)
-                                    val popText: TextView = findViewById(R.id.pop)
-                                    val windText: TextView = findViewById(R.id.wind)
-                                    val visibilityText: TextView = findViewById(R.id.visibility)
-                                    val cloudsText: TextView = findViewById(R.id.clouds)
-                                    val sunriseText: TextView = findViewById(R.id.sunrise)
-                                    val sunsetText: TextView = findViewById(R.id.sunset)
-                                    val timeTownText: TextView = findViewById(R.id.timeTown)
-                                    Log.d("textV", tempText.text.toString())
-                                    tempText.text =
-                                        getString(R.string.temp_value, response.body()?.main?.temp)
-                                    tempFeelsText.text = getString(
-                                        R.string.temp_feels_value,
-                                        response.body()?.main?.feels_like
-                                    )
-                                    weatherDescriptionText.text =
-                                        response.body()?.weather?.get(0)?.description
-                                    pressureText.text = getString(
-                                        R.string.pressure_value,
-                                        response.body()?.main?.pressure
-                                    )
-                                    humidityText.text = getString(
-                                        R.string.percent_value,
-                                        response.body()?.main?.humidity.toString()
-                                    )
-                                    popText.text = getString(
-                                        R.string.percent_value,
-                                        response.body()?.pop ?: "0"
-                                    )
-                                    windText.text = getString(
-                                        R.string.wind_value,
-                                        response.body()?.wind?.speed, response.body()?.wind?.deg
-                                    )
-                                    visibilityText.text = getString(
-                                        R.string.visibility_value,
-                                        response.body()?.visibility
-                                    )
-                                    cloudsText.text = getString(
-                                        R.string.percent_value,
-                                        response.body()?.clouds?.all.toString()
-                                    )
-                                    val tz = TimeZone.getDefault()
-                                    sunriseText.text = getDateString(
-                                        response.body()!!.sys.sunrise +
-                                                response.body()!!.timezone - tz.rawOffset / 1000
-                                    )
-                                    sunsetText.text = getDateString(
-                                        response.body()!!.sys.sunset +
-                                                response.body()!!.timezone - tz.rawOffset / 1000
-                                    )
-                                    timeTownText.text = getDateString(
-                                        response.body()!!.dt +
-                                                response.body()!!.timezone - tz.rawOffset / 1000
-                                    )
-                                }
-
-                            }
-                        } catch (e: Throwable) {
-                            Toast.makeText(applicationContext, "Oops", Toast.LENGTH_SHORT).show()
-
-                        }
-                    }
-                }
+                getWeatherApi(tabTown, false)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -155,6 +80,98 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    fun getWeatherApi(nameTown: String, isNew: Boolean) {
+        val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
+        CoroutineScope(Dispatchers.IO).launch {
+            val response = weatherApi.getWeather(nameTown, Locale.getDefault().country)
+            withContext(Dispatchers.Main) {
+                try {
+                    if (response.isSuccessful) {
+                        runOnUiThread {
+                            if (isNew) {
+                                val tabLayout: TabLayout = findViewById(R.id.tabs)
+                                val viewPager: ViewPager2 = findViewById(R.id.pager)
+
+                                tabLayout.addTab(tabLayout.newTab().setText(nameTown), true)
+                                savedTown.add(nameTown)
+                                saveTown(savedTown)
+                                countTabs++
+                                getWeatherView(response)
+                                tabLayout.selectTab(tabLayout.getTabAt(countTabs - 1))
+                                viewPager.adapter = SectionPagerAdapter(this@MainActivity)
+                            } else {
+                                getWeatherView(response)
+                            }
+                        }
+                    }
+                } catch (e: HttpException) {
+                    Toast.makeText(applicationContext, "Exception ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
+                } catch (e: Throwable) {
+                    Toast.makeText(
+                        applicationContext,
+                        "Ooops: Something else went wrong",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun getWeatherView(response: Response<WeatherData>) {
+        val tempText: TextView = findViewById(R.id.current_temp)
+        val tempFeelsText: TextView = findViewById(R.id.feels_temp)
+        val weatherDescriptionText: TextView = findViewById(R.id.weather_description)
+        val pressureText: TextView = findViewById(R.id.pressure)
+        val humidityText: TextView = findViewById(R.id.humidity)
+        val popText: TextView = findViewById(R.id.pop)
+        val windText: TextView = findViewById(R.id.wind)
+        val visibilityText: TextView = findViewById(R.id.visibility)
+        val cloudsText: TextView = findViewById(R.id.clouds)
+        val sunriseText: TextView = findViewById(R.id.sunrise)
+        val sunsetText: TextView = findViewById(R.id.sunset)
+        val timeTownText: TextView = findViewById(R.id.timeTown)
+        tempText.text = getString(R.string.temp_value, response.body()?.main?.temp)
+        tempFeelsText.text = getString(R.string.temp_feels_value, response.body()?.main?.feels_like)
+        weatherDescriptionText.text = response.body()?.weather?.get(0)?.description
+        pressureText.text = getString(
+            R.string.pressure_value,
+            response.body()?.main?.pressure
+        )
+        humidityText.text = getString(
+            R.string.percent_value,
+            response.body()?.main?.humidity.toString()
+        )
+        popText.text = getString(
+            R.string.percent_value,
+            response.body()?.pop ?: "0"
+        )
+        windText.text = getString(
+            R.string.wind_value,
+            response.body()?.wind?.speed, response.body()?.wind?.deg
+        )
+        visibilityText.text = getString(
+            R.string.visibility_value,
+            response.body()?.visibility
+        )
+        cloudsText.text = getString(
+            R.string.percent_value,
+            response.body()?.clouds?.all.toString()
+        )
+        val tz = TimeZone.getDefault()
+        sunriseText.text = getDateString(
+            response.body()!!.sys.sunrise +
+                    response.body()!!.timezone - tz.rawOffset / 1000
+        )
+        sunsetText.text = getDateString(
+            response.body()!!.sys.sunset +
+                    response.body()!!.timezone - tz.rawOffset / 1000
+        )
+        timeTownText.text = getDateString(
+            response.body()!!.dt +
+                    response.body()!!.timezone - tz.rawOffset / 1000
+        )
+    }
 
     fun saveTown(nameTown: MutableList<String>) {
         val sharedPreferences: SharedPreferences = getSharedPreferences("WeatherTown", MODE_PRIVATE)
@@ -165,13 +182,12 @@ class MainActivity : AppCompatActivity() {
 
     fun loadTown(): MutableSet<String>? {
         val sharedPreferences: SharedPreferences = getSharedPreferences("WeatherTown", MODE_PRIVATE)
-        //    Toast.makeText(this, shKey.toString(), Toast.LENGTH_SHORT).show()
         return sharedPreferences.getStringSet("save_town", null)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            R.id.refresh_weather -> Toast.makeText(this, "refresh", Toast.LENGTH_SHORT).show()
+        when (item.itemId) {
+            R.id.refresh_weather -> refreshWeather()
             R.id.add_town -> addNewTown()
             R.id.list_towns -> viewListTown()
             R.id.units -> Toast.makeText(this, "units", Toast.LENGTH_SHORT).show()
@@ -216,92 +232,16 @@ class MainActivity : AppCompatActivity() {
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(View.OnClickListener {
             if (!checkEmpty(inputTown, applicationContext)) {
                 townName = inputTown.text.toString()
-
-                val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    val response = weatherApi.getWeather(townName, Locale.getDefault().country)
-                    withContext(Dispatchers.Main) {
-                        if (!checkTownName(inputTown, applicationContext, response.code())) {
-                            try {
-                                if (response.isSuccessful) {
-                                    val tabLayout: TabLayout = findViewById(R.id.tabs)
-                                    tabLayout.addTab(tabLayout.newTab().setText(townName), true)
-
-
-
-                                    runOnUiThread {
-                                        savedTown.add(townName)
-                                        saveTown(savedTown)
-                                        countTabs++
-
-                                        val tempText: TextView = findViewById(R.id.current_temp)
-                                        val tempFeelsText: TextView = findViewById(R.id.feels_temp)
-                                        val weatherDescriptionText: TextView = findViewById(R.id.weather_description)
-                                        val pressureText: TextView = findViewById(R.id.pressure)
-                                        val humidityText: TextView = findViewById(R.id.humidity)
-                                        val popText: TextView = findViewById(R.id.pop)
-                                        val windText: TextView = findViewById(R.id.wind)
-                                        val visibilityText: TextView = findViewById(R.id.visibility)
-                                        val cloudsText: TextView = findViewById(R.id.clouds)
-                                        val sunriseText: TextView = findViewById(R.id.sunrise)
-                                        val sunsetText: TextView = findViewById(R.id.sunset)
-                                        val timeTownText: TextView = findViewById(R.id.timeTown)
-                                        Log.d("textV", tempText.text.toString())
-                                            tempText.text = getString(R.string.temp_value, response.body()?.main?.temp)
-                                            tempFeelsText.text = getString(R.string.temp_feels_value, response.body()?.main?.feels_like)
-                                            weatherDescriptionText.text = response.body()?.weather?.get(0)?.description
-                                            pressureText.text = getString(R.string.pressure_value,
-                                                response.body()?.main?.pressure)
-                                            humidityText.text = getString(R.string.percent_value,
-                                                response.body()?.main?.humidity.toString())
-                                            popText.text = getString(R.string.percent_value,
-                                                response.body()?.pop ?: "0")
-                                            windText.text = getString(R.string.wind_value,
-                                                response.body()?.wind?.speed, response.body()?.wind?.deg)
-                                            visibilityText.text = getString(R.string.visibility_value,
-                                                response.body()?.visibility)
-                                            cloudsText.text = getString(R.string.percent_value,
-                                                response.body()?.clouds?.all.toString())
-                                            val tz = TimeZone.getDefault()
-                                            sunriseText.text = getDateString(response.body()!!.sys.sunrise +
-                                                response.body()!!.timezone - tz.rawOffset / 1000)
-                                            sunsetText.text = getDateString(response.body()!!.sys.sunset+
-                                                    response.body()!!.timezone - tz.rawOffset / 1000)
-                                            timeTownText.text = getDateString(response.body()!!.dt +
-                                                    response.body()!!.timezone - tz.rawOffset / 1000)
-
-                                    }
-
-                                }
-                            } catch (e: HttpException) {
-                                Toast.makeText(applicationContext, "Exception ${e.message}", Toast.LENGTH_SHORT).show()
-                            } catch (e: Throwable) {
-                                Toast.makeText(applicationContext, "Ooops: Something else went wrong", Toast.LENGTH_SHORT).show()
-                            }
-
-//                            Log.d("temper", tempText.text.toString())
-                            alertDialog.dismiss()
-
-
-                        }
-
-                    }
-
-                }
-                val tabLayout: TabLayout = findViewById(R.id.tabs)
-                val viewPager: ViewPager2 = findViewById(R.id.pager)
-                Log.d("current", viewPager.currentItem.toString())
-                viewPager.currentItem = countTabs - 1
-                tabLayout.selectTab(tabLayout.getTabAt(viewPager.currentItem))
-                Log.d("current", viewPager.currentItem.toString())
-                viewPager.setOnDragListener { v, event ->
-                    Log.d("event", event.toString())
-                    return@setOnDragListener true
-                }
-                viewPager.adapter = SectionPagerAdapter(this@MainActivity)
+                getWeatherApi(townName, true)
             }
+            alertDialog.dismiss()
         })
+    }
+
+    fun refreshWeather() {
+        val tabLayout: TabLayout = findViewById(R.id.tabs)
+        val nameTown = tabLayout.getTabAt(tabLayout.selectedTabPosition)?.text.toString()
+        getWeatherApi(nameTown, false)
     }
 
 
@@ -312,12 +252,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun viewListTown() {
         var name = ""
-    //    Toast.makeText(this, loadTown().size.toString(), Toast.LENGTH_SHORT).show()
         val checkedItems: MutableList<Boolean> = BooleanArray(savedTown.size).toMutableList()
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setIcon(R.drawable.town)
         builder.setTitle(R.string.list_towns)
-        builder.setMultiChoiceItems(savedTown.toTypedArray(), checkedItems.toBooleanArray()) { _, which, isChecked ->
+        builder.setMultiChoiceItems(
+            savedTown.toTypedArray(),
+            checkedItems.toBooleanArray()
+        ) { _, which, isChecked ->
             checkedItems[which] = isChecked
             name = savedTown[which]
         }
@@ -327,13 +269,12 @@ class MainActivity : AppCompatActivity() {
         builder.setNegativeButton(R.string.delete_btn) { dialog, which ->
             val tabLayout: TabLayout = findViewById(R.id.tabs)
             val viewPager: ViewPager2 = findViewById(R.id.pager)
-            for(i in savedTown.size - 1 downTo 0) {
+            for (i in savedTown.size - 1 downTo 0) {
                 if (checkedItems[i]) {
                     savedTown.removeAt(i)
                     tabLayout.removeTab(tabLayout.getTabAt(i)!!)
                 }
             }
-
             saveTown(savedTown)
             countTabs = savedTown.size
             viewPager.currentItem = 0
