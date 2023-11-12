@@ -31,7 +31,8 @@ data class WeatherData(
 
     data class Weather(
         val description: String,
-        val main: String
+        val icon: String,
+        val id: Int
     )
 
     data class Wind(

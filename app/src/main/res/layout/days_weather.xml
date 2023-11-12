@@ -25,12 +25,22 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:adjustViewBounds="true"
-                android:src="@drawable/_0d"/>
+                android:contentDescription="@string/weather" />
             <TextView
                 android:id="@+id/day_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="14°/5°"
                 android:textSize="13sp" />
+            <TextView
+                android:id="@+id/day_weather_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Небольшой дождь"
+                android:gravity="center"
+                android:minLines="1"
+                android:maxLines="4"
+                android:singleLine="false"
+                android:textSize="11sp" />
     </LinearLayout>
 </LinearLayout>

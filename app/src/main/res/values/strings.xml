@@ -6,15 +6,19 @@
     <string name="list_towns">Список городов</string>
     <string name="units">Единицы измерения</string>
     <string name="ok_btn">OK</string>
+    <string name="close_btn">Закрыть</string>
     <string name="cancel_btn">Отмена</string>
     <string name="delete_btn">Удалить отмеченные?</string>
     <string name="error_town">Город не найден, повторите поиск</string>
     <string name="error_town_empty">Поле ввода не может быть пустым!</string>
+    <string name="last_refresh">Последнее обновление: </string>
 
-    <string name="temp_value">%1$.0f°</string>
-    <string name="temp_feels_value">Ощущается %1$.0f°</string>
+    <string name="temp_value">%1$.0f°C</string>
+    <string name="temp_max_min">%1$.0f°C/%2$.0f°C</string>
+    <string name="temp_feels_value">Ощущается %1$.0f°C</string>
     <string name="pressure_value">%1$d мм.рт.ст</string>
     <string name="percent_value">%1$s%%</string>
     <string name="visibility_value">%1$d м</string>
-    <string name="wind_value">%1$.2f м/с %2$d</string>
+    <string name="wind_value">%1$.1f м/с\n%2$s</string>
+    <string name="weather">weather</string>
 </resources>

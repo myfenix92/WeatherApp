@@ -6,14 +6,18 @@
     tools:context=".TownFragment">
 
     <LinearLayout
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="100dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:gravity="center"
         android:padding="15dp"
         android:orientation="vertical">
-
+        <ImageView
+            android:id="@+id/icon_current_weather"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:padding="3dip" />
         <TextView
             android:id="@+id/current_temp"
             android:layout_width="wrap_content"
@@ -35,25 +39,21 @@
         android:padding="10dp"
         android:columnCount="2"
         android:layout_gravity="end">
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="3dip"
-                android:layout_gravity="center"
-                android:src="@drawable/_0d" />
             <TextView
                 android:id="@+id/weather_description"
                 android:maxWidth="95dp"
-                android:minLines = "1"
-                android:maxLines = "4"
-                android:singleLine = "false"
+                android:minLines="1"
+                android:maxLines="4"
+                android:singleLine="false"
                 android:layout_gravity="fill"
-                android:gravity="start|center"
+                android:gravity="center"
+                android:layout_columnSpan="2"
                 android:padding="3dip" />
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_pressure" />
             <TextView
                 android:id="@+id/pressure"
@@ -64,6 +64,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_humidity" />
             <TextView
                 android:id="@+id/humidity"
@@ -75,6 +76,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_pop" />
             <TextView
                 android:id="@+id/pop"
@@ -86,6 +88,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end|center"
                 android:src="@drawable/param_wind" />
             <TextView
                 android:id="@+id/wind"
@@ -97,6 +100,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_visibility" />
             <TextView
                 android:id="@+id/visibility"
@@ -108,6 +112,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_clouds" />
             <TextView
                 android:id="@+id/clouds"
@@ -119,6 +124,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_sunrise" />
             <TextView
                 android:id="@+id/sunrise"
@@ -130,30 +136,20 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:padding="3dip"
+                android:layout_gravity="end"
                 android:src="@drawable/param_sunset" />
             <TextView
                 android:id="@+id/sunset"
                 android:padding="3dip"
                 android:layout_gravity="fill"
                 android:gravity="start|center"/>
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="3dip"
-            android:src="@drawable/param_clock" />
-        <TextView
-            android:id="@+id/timeTown"
-            android:padding="3dip"
-            android:layout_gravity="fill"
-            android:gravity="start|center"/>
 
     </GridLayout>
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <include
-            layout="@layout/days_weather"/>
         <include layout="@layout/days_weather"/>
         <include layout="@layout/days_weather"/>
         <include layout="@layout/days_weather"/>
