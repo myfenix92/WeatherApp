@@ -146,13 +146,10 @@
 
     </GridLayout>
     <LinearLayout
+        android:id="@+id/forecast_days_layout"
         android:orientation="horizontal"
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <include layout="@layout/days_weather"/>
-        <include layout="@layout/days_weather"/>
-        <include layout="@layout/days_weather"/>
-        <include layout="@layout/days_weather"/>
     </LinearLayout>
 </FrameLayout>

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_main"
     tools:context=".MainActivity">
     <ProgressBar
         android:id="@+id/progressBar"
@@ -24,8 +23,6 @@
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             app:tabMode="auto"
-            android:background="@color/bg_fragment"
-            app:tabSelectedTextColor="@color/test"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <LinearLayout

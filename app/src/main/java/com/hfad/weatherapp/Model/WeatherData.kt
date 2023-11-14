@@ -1,4 +1,7 @@
 package com.hfad.weatherapp.Model
+
+import com.hfad.weatherapp.IWeather
+
 data class WeatherData(
     val clouds: Clouds,
     val dt: Long,
@@ -6,7 +9,7 @@ data class WeatherData(
     val main: Main,
     val sys: Sys,
     val visibility: Int,
-    var pop: Double?,
+    var rain: Rain,
     val weather: List<Weather>,
     val wind: Wind,
     val timezone: Int
@@ -28,7 +31,9 @@ data class WeatherData(
         val sunrise: Long,
         val sunset: Long
     )
-
+    data class Rain(
+        val `1h`: Double?
+    )
     data class Weather(
         val description: String,
         val icon: String,
