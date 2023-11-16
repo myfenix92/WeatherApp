@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_margin="2dp"
+    android:layout_weight="1"
     android:layout_width="0dp"
+    android:layout_height="wrap_content">
+<LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_weight="1"
     android:background="#ffffff"
     android:gravity="center"
-    android:paddingTop="20dp"
+    android:paddingTop="5dp"
     android:id="@+id/card_view_days_weather">
             <TextView
                 android:id="@+id/date_day"
@@ -34,10 +40,10 @@
                 android:id="@+id/day_weather_desc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="облачно с прояснениями"
                 android:gravity="center"
                 android:minLines="2"
                 android:maxLines="4"
                 android:singleLine="false"
                 android:textSize="11sp" />
 </LinearLayout>
+</androidx.cardview.widget.CardView>

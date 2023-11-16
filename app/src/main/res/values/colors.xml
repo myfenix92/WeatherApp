@@ -2,4 +2,10 @@
 <resources>
     <color name="bg_fragment">#B8B8B8</color>
     <color name="bg_main">#A0E0FF</color>
+    <color name="colorGreen">#32CD32</color>
+    <color name="colorOrange">#E39208</color>
+    <color name="colorYellow">#D9D919</color>
+    <color name="colorRed">#cc0000</color>
+    <color name="colorMagenta">#e34ec9</color>
+    <color name="colorMaroon">#58232e</color>
 </resources>

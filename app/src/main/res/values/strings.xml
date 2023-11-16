@@ -15,9 +15,9 @@
     <string name="last_refresh">Последнее обновление: </string>
     <string name="day_night">День/Ночь </string>
 
-    <string name="temp_value">%1$.0f°C</string>
-    <string name="temp_max_min">%1$.0f°C/%2$.0f°C</string>
-    <string name="temp_feels_value">Ощущается %1$.0f°C</string>
+    <string name="temp_value">%1$d°C</string>
+    <string name="temp_max_min">%1$d°C/%2$d°C</string>
+    <string name="temp_feels_value">Ощущается %1$d°C</string>
     <string name="pressure_value">%1$d мм.рт.ст</string>
     <string name="percent_value">%1$s%%</string>
     <string name="visibility_value">%1$d м</string>

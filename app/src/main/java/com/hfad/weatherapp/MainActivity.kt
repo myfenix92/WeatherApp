@@ -2,6 +2,11 @@ package com.hfad.weatherapp
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,15 +17,20 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatSeekBar
+import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hfad.weatherapp.Interface.RetrofitServices
@@ -30,6 +40,8 @@ import com.hfad.weatherapp.retrofit.RetrofitClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -42,7 +54,6 @@ import kotlin.math.floor
 
 
 var countTabs: Int = 0
-
 class MainActivity : AppCompatActivity() {
     private var savedTown: MutableList<String> = mutableListOf()
 
@@ -55,24 +66,26 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = SectionPagerAdapter(this)
         savedTown = loadTown().first?.toMutableList() ?: mutableListOf()
         countTabs = savedTown.size
-
         val tabLayout: TabLayout = findViewById(R.id.tabs)
-        if (countTabs == 0) {
+
+
+        if (savedTown.size != 0 && savedTown[0].isEmpty()) {
+            savedTown.clear()
+            viewPager.visibility = ViewPager2.INVISIBLE
             addNewTown()
         } else {
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                 tab.text = savedTown[position]
             }.attach()
             tabLayout.getTabAt(loadTown().second)?.select()
+            getWeatherApi(tabLayout.getTabAt(loadTown().second)?.text.toString(), false)
         }
-        refreshWeather()
 
-
+   //     refreshWeather()
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val tabTown: String = tab?.text.toString()
                 getWeatherApi(tabTown, false)
-            //    getForecastApi(tabTown, false)
                 saveTown(savedTown, tabLayout.selectedTabPosition)
                 refreshWeather()
 
@@ -95,11 +108,6 @@ class MainActivity : AppCompatActivity() {
         val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
         AsyncTaskExecutorService().execute(nameTown, weatherApi, isNew)
     }
-
-//    private fun getForecastApi(nameTown: String, isNew: Boolean) {
-//        val weatherApi = RetrofitClient.getInstance().create(RetrofitServices::class.java)
-//        AsyncTaskExecutorService().execute(nameTown, weatherApi, isNew)
-//    }
 
     private fun degToCompass(num: Int?): String {
         val degValue: Int = floor((num?.div(22.5))?.plus(0.5) ?: 0.0).toInt();
@@ -137,6 +145,7 @@ class MainActivity : AppCompatActivity() {
             804 -> imageView.setImageResource(R.drawable.weather_cloud_804)
         }
     }
+
     private fun getWeatherView(response: Response<WeatherData>) {
         val iconCurrent: ImageView = findViewById(R.id.icon_current_weather)
         val tempText: TextView = findViewById(R.id.current_temp)
@@ -154,9 +163,8 @@ class MainActivity : AppCompatActivity() {
 
         val imageID: Int = response.body()?.weather?.get(0)?.id!!
         setImage(iconCurrent, imageID)
-
-        tempText.text = getString(R.string.temp_value, response.body()?.main?.temp)
-        tempFeelsText.text = getString(R.string.temp_feels_value, response.body()?.main?.feels_like)
+        tempText.text = getString(R.string.temp_value, response.body()?.main?.temp?.toInt())
+        tempFeelsText.text = getString(R.string.temp_feels_value, response.body()?.main?.feels_like?.toInt())
         weatherDescriptionText.text = response.body()?.weather?.get(0)?.description
         pressureText.text = getString(
             R.string.pressure_value,
@@ -197,16 +205,18 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun getForecastView(response: Response<ForecastData>) {
+    fun getForecastView(response: Response<ForecastData>) {
         val daysForecast: LayoutInflater = LayoutInflater.from(applicationContext)
         val forecastLayout: LinearLayout = findViewById(R.id.forecast_days_layout)
         val tz = TimeZone.getDefault()
         val startTime = response.body()?.list?.get(0)?.dt?.minus(tz.rawOffset / 1000)
         val startValue: String = getDateString(startTime!!.toLong()).substring(0, 2)
-
+        val getTimeInterval = 3
+        val start = ((24 - startValue.toInt()) / getTimeInterval) //24h in day
+        val step = 24 / getTimeInterval
+        val countDay = 4
         forecastLayout.removeAllViews()
-        for ((count, i) in (((24 - startValue.toInt()) / 3) until
-                response.body()!!.list.size - (24 - startValue.toInt()) step 8).withIndex()) {
+        for ((count, i) in (start until start + step * countDay step step).withIndex()) {
             daysForecast.inflate(R.layout.days_weather, forecastLayout)
             forecastLayout[count].findViewById<TextView>(R.id.date_day).text =
                 response.body()?.list?.get(i)?.dt_txt
@@ -215,8 +225,8 @@ class MainActivity : AppCompatActivity() {
                     ?.reversed()
                     ?.joinToString(separator = "-")
             forecastLayout[count].findViewById<TextView>(R.id.day_temp).text =
-                getString(R.string.temp_max_min, response.body()?.list?.get(i + 4)?.main?.temp_max,
-                    response.body()?.list?.get(i)?.main?.temp_min)
+                getString(R.string.temp_max_min, response.body()?.list?.get(i + 4)?.main?.temp_max?.toInt(),
+                    response.body()?.list?.get(i)?.main?.temp_min?.toInt())
             val imageID: Int = response.body()?.list?.get(i)?.weather?.get(0)?.id!!
             setImage(forecastLayout[count].findViewById(R.id.icon_weather), imageID)
             forecastLayout[count].findViewById<TextView>(R.id.day_weather_desc).text =
@@ -262,9 +272,10 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun checkTownName(input: String, context: Context, code: Int = 400): Boolean {
+    fun checkTownName(input: String, context: Context, code: Int): Boolean {
         if (input.isNotEmpty() && code == 404) {
             Toast.makeText(context, R.string.error_town, Toast.LENGTH_SHORT).show()
+            addNewTown()
             return true
         }
         return false
@@ -283,8 +294,7 @@ class MainActivity : AppCompatActivity() {
         builder.setPositiveButton(R.string.ok_btn) { _, _ ->
 
         }
-        builder.setNegativeButton(R.string.cancel_btn) { dialog, _ ->
-            dialog.dismiss()
+        builder.setNegativeButton(R.string.cancel_btn) { _, _ ->
         }
         val alertDialog: AlertDialog = builder.create()
         alertDialog.show()
@@ -292,9 +302,14 @@ class MainActivity : AppCompatActivity() {
             if (!checkEmpty(inputTown, applicationContext)) {
                     townName = inputTown.text.toString()
                     getWeatherApi(townName, true)
-                        //   refreshWeather()
-                    //getForecastApi(townName, true)
-                    alertDialog.cancel()
+                    alertDialog.dismiss()
+            }
+        })
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(View.OnClickListener {
+            if (savedTown.size == 0) {
+                Toast.makeText(this, "Нет городов, добавьте город!", Toast.LENGTH_SHORT).show()
+            } else {
+                alertDialog.dismiss()
             }
         })
     }
@@ -303,7 +318,6 @@ class MainActivity : AppCompatActivity() {
         val tabLayout: TabLayout = findViewById(R.id.tabs)
         val nameTown = tabLayout.getTabAt(tabLayout.selectedTabPosition)?.text.toString()
         getWeatherApi(nameTown, false)
-        //getForecastApi(nameTown, false)
     }
 
 
@@ -313,7 +327,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun viewListTown() {
-        var name = ""
         val checkedItems: MutableList<Boolean> = BooleanArray(savedTown.size).toMutableList()
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setIcon(R.drawable.town)
@@ -323,7 +336,7 @@ class MainActivity : AppCompatActivity() {
             checkedItems.toBooleanArray()
         ) { _, which, isChecked ->
             checkedItems[which] = isChecked
-            name = savedTown[which]
+            savedTown[which]
         }
         builder.setPositiveButton(R.string.close_btn) { dialog, _ ->
             dialog.dismiss()
@@ -341,16 +354,27 @@ class MainActivity : AppCompatActivity() {
             saveTown(savedTown, 0)
             countTabs = savedTown.size
             viewPager.currentItem = 0
-            viewPager.adapter = SectionPagerAdapter(this)
-            dialog.dismiss()
             if (savedTown.size == 0) {
-                viewPager.adapter = SectionPagerAdapter(this)
+                val linearLayout: LinearLayout = findViewById(R.id.last_refresh_layout)
+                linearLayout.visibility = LinearLayout.INVISIBLE
+                viewPager.visibility = ViewPager2.INVISIBLE
+                Toast.makeText(this, "Нет городов, добавьте город!", Toast.LENGTH_SHORT).show()
                 addNewTown()
             }
-            refreshWeather()
+            dialog.dismiss()
         }
         builder.create()
         builder.show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        AsyncTaskExecutorService().cancel()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        AsyncTaskExecutorService().cancel()
     }
 
     inner class AsyncTaskExecutorService: CoroutineScope {
@@ -365,68 +389,37 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun execute(nameTown: String, weatherApi: RetrofitServices, isNew: Boolean) {
-            onPreExecute()
             launch {
-                val response = weatherApi.getWeather(nameTown, Locale.getDefault().country)
-                doInBackground(nameTown, response, isNew) // runs in background thread without blocking the Main Thread
+                onPreExecute()
+                val responseA = weatherApi.getWeather(nameTown, Locale.getDefault().country)
+                val responseB = weatherApi.getForecast(nameTown, Locale.getDefault().country)
+                doInBackground(nameTown, responseA, responseB, isNew)
+                onPostExecute()
             }
-            launch {
-                val response = weatherApi.getForecast(nameTown, Locale.getDefault().country)
-                doInBackground1(nameTown, response, isNew) // runs in background thread without blocking the Main Thread
-            }
-            onPostExecute()
         }
 
-        private suspend fun doInBackground(nameTown: String, response: Response<WeatherData>, isNew: Boolean): String = withContext(Dispatchers.IO) { // to run code in Background Thread
-            if (!checkTownName(nameTown, applicationContext, response.code())) {
+        private suspend fun doInBackground(nameTown: String, responseA: Response<WeatherData>, responseB: Response<ForecastData>, isNew: Boolean): String = withContext(Dispatchers.IO) { // to run code in Background Thread
                 try {
-                    if (response.isSuccessful) {
+                   // delay(50)
+                    if (responseA.isSuccessful && responseB.isSuccessful) {
                         runOnUiThread {
                             if (isNew) {
                                 val tabLayout: TabLayout = findViewById(R.id.tabs)
-                                val viewPager: ViewPager2 = findViewById(R.id.pager)
                                 tabLayout.addTab(tabLayout.newTab().setText(nameTown), true)
                                 savedTown.add(nameTown)
                                 countTabs++
-                                getWeatherView(response)
                                 tabLayout.getTabAt(countTabs - 1)?.select()
                                 saveTown(savedTown, tabLayout.selectedTabPosition)
-                                viewPager.adapter = SectionPagerAdapter(this@MainActivity)
+                                getWeatherView(responseA)
+                                getForecastView(responseB)
                             } else {
-                                getWeatherView(response)
+                                getWeatherView(responseA)
+                                getForecastView(responseB)
                             }
                         }
-                    }
-                } catch (e: HttpException) {
-                    Toast.makeText(
-                        applicationContext,
-                        "Exception ${e.message}",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                } catch (e: Throwable) {
-                    Toast.makeText(
-                        applicationContext,
-                        "Ooops: Something else went wrong",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            return@withContext "SomeResult"
-        }
-
-        private suspend fun doInBackground1(nameTown: String, response: Response<ForecastData>, isNew: Boolean): String = withContext(Dispatchers.IO) { // to run code in Background Thread
-            if (!checkTownName(nameTown, applicationContext, response.code())) {
-                try {
-                    if (response.isSuccessful) {
+                    } else if (!responseA.isSuccessful && !responseB.isSuccessful) {
                         runOnUiThread {
-                            if (isNew) {
-                                val viewPager: ViewPager2 = findViewById(R.id.pager)
-                                getForecastView(response)
-                                viewPager.adapter = SectionPagerAdapter(this@MainActivity)
-                            } else {
-                                getForecastView(response)
-                            }
+                            checkTownName(nameTown, applicationContext, responseA.code())
                         }
                     }
                 } catch (e: HttpException) {
@@ -443,8 +436,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            }
-            return@withContext "SomeResult"
+            return@withContext responseA.body()?.name.toString()
         }
 
         // Runs on the Main(UI) Thread

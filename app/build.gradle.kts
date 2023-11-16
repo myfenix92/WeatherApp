@@ -13,7 +13,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
+        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -41,6 +41,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.5.0")
     implementation ("com.sealwu.jsontokotlin:library:3.7.4")
     implementation("com.squareup.okhttp3:logging-interceptor:4.7.2")
+  //  implementation ("com.android.support:multidex:1.0.3")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")

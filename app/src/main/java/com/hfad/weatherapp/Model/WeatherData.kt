@@ -1,7 +1,5 @@
 package com.hfad.weatherapp.Model
 
-import com.hfad.weatherapp.IWeather
-
 data class WeatherData(
     val clouds: Clouds,
     val dt: Long,
@@ -12,7 +10,8 @@ data class WeatherData(
     var rain: Rain,
     val weather: List<Weather>,
     val wind: Wind,
-    val timezone: Int
+    val timezone: Int,
+    val name: String
 ) {
     data class Clouds(
         val all: Int
@@ -23,8 +22,6 @@ data class WeatherData(
         val humidity: Int,
         val pressure: Int,
         val temp: Double,
-        val temp_max: Double,
-        val temp_min: Double
     )
 
     data class Sys(
